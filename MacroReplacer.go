@@ -3,7 +3,6 @@ package mare
 import (
 	"fmt"
 	"regexp"
-	"strings"
 )
 
 // Process a replacement using the default configuration:
@@ -25,10 +24,10 @@ import (
 //
 // Important: Nesting of functions is not supported
 func Process(str string, replacements map[string]any) string {
-	return ProcessWithConfig(str, replacements, defaultConfig)
+	return ProcessWithConfig(str, replacements, DefaultConfig())
 }
 
-func ProcessWithConfig(str string, replacements map[string]any, cfg ParserConfig) string {
+func ProcessWithConfig(str string, replacements map[string]any, cfg *ParserConfig) string {
 	processed := str
 
 	// First loop: replace
@@ -46,7 +45,7 @@ func ProcessWithConfig(str string, replacements map[string]any, cfg ParserConfig
 	return processed
 }
 
-func evaluateFunctions(str string, cfg ParserConfig) string {
+func evaluateFunctions(str string, cfg *ParserConfig) string {
 	processed := str
 
 	// Second loop: function evaluation
@@ -61,7 +60,7 @@ func evaluateFunctions(str string, cfg ParserConfig) string {
 		funcName := currMatch[1]
 		funcParam := currMatch[2]
 
-		funcResult := execFunc(funcName, funcParam)
+		funcResult := cfg.ExecFunc(funcName, funcParam)
 		funcReplRe, err := regexp.Compile(regexp.QuoteMeta(funcRef))
 		if err != nil {
 			return ""
@@ -73,26 +72,13 @@ func evaluateFunctions(str string, cfg ParserConfig) string {
 
 }
 
-func makeReplRe(keyword string, cfg ParserConfig) (*regexp.Regexp, error) {
+func makeReplRe(keyword string, cfg *ParserConfig) (*regexp.Regexp, error) {
 	quoted := cfg.ToQuoted()
 	return regexp.Compile(fmt.Sprintf(`(%s%s%s)`, quoted.KeywordPrefix, keyword, quoted.KeywordSuffix))
 }
 
-func makeFuncRe(cfg ParserConfig) (*regexp.Regexp, error) {
+func makeFuncRe(cfg *ParserConfig) (*regexp.Regexp, error) {
 	quoted := cfg.ToQuoted()
 
 	return regexp.Compile(fmt.Sprintf(`%s(\w+)\(([\w\s]+)\)`, quoted.FunctionDelimiter))
-}
-
-func execFunc(funcName string, funcParam string) string {
-	switch strings.ToUpper(funcName) {
-	case "UPPER":
-		return strings.ToUpper(funcParam)
-	case "FIRSTLETTER":
-		return funcParam[0:1]
-	case "LOWER":
-		return strings.ToLower(funcParam)
-	default:
-		return funcParam
-	}
 }

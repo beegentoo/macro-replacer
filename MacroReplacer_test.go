@@ -32,7 +32,7 @@ func Test_ProcessFunction(t *testing.T) {
 	}
 }
 
-func Test_Functions(t *testing.T) {
+func Test_FunctionEvaluation(t *testing.T) {
 	origString := "§Upper(HansDampf)"
 	expResult := "HANSDAMPF"
 
@@ -55,23 +55,5 @@ func Test_Complicated(t *testing.T) {
 
 	if targetDirectoryExpected != actResult {
 		t.Fatalf("Expected %s but got %s", targetDirectoryExpected, actResult)
-	}
-}
-
-func Test_execFunc(t *testing.T) {
-	if execFunc("upper", "aAa") != "AAA" {
-		t.Fail()
-	}
-
-	if execFunc("firstletter", "Zebra Flotilla") != "Z" {
-		t.Fail()
-	}
-
-	if execFunc("lower", "Xxx") != "xxx" {
-		t.Fail()
-	}
-
-	if execFunc("nonExistant", "Dummy") != "Dummy" {
-		t.Fail()
 	}
 }
